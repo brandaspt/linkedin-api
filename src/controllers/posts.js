@@ -5,8 +5,10 @@ import PostModel from "../models/post.js"
 
 export const getAllPosts = async (req, res, next) => {
   try {
+    const query = q2m(req.query)
+    const totalPosts = await PostModel.countDocuments(query.criteria)
     const posts = await PostModel.find()
-    res.send(posts)
+    res.send({ links: query.links("/posts", totalPosts), totalPosts, posts })
   } catch (error) {
     next(createError(500, "An error occurred while getting posts "));
   }
