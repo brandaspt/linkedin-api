@@ -6,16 +6,27 @@ const reqString = { type: String, required: true }
 
 const PostSchema = new Schema(
   {
-    name: reqString,
-    reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
-    description: reqString,
-    brand: reqString,
-    imageURL: {
-      ...reqString,
-      default: "https://m3placement.com/wp-content/uploads/2021/03/image-placeholder-350x350-1.png",
+    text:{
+      type: String,
+      required: true,
     },
-    price: { type: Number, required: true },
-    category: reqString,
+    username:{
+      type: String,
+      required:true
+    },
+    userId:{
+      type: String,
+      required: true,
+    },
+    image:{
+      type: String
+    },
+    likes:[
+      {
+        userId:String,
+        
+      },
+    ],  
   },
   { timestamps: true }
 )
