@@ -2,7 +2,8 @@ import express from "express"
 import mongoose from "mongoose"
 import cors from "cors"
 
-import productsRouter from "./services/products/products.js"
+import usersRouter from "./services/users/users.js"
+import postsRouter from "./services/posts/posts.js"
 import { errorHandler } from "./errorHandlers.js"
 
 const server = express()
@@ -15,7 +16,8 @@ server.use(express.json())
 
 // ### ENDPOINTS ###
 
-server.use("/products", productsRouter)
+server.use("/users", usersRouter)
+server.use("/posts", postsRouter)
 
 // ### ERROR HANDLERS ###
 server.use(errorHandler)
