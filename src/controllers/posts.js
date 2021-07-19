@@ -83,7 +83,7 @@ export const uploadPostImage = async (req, res, next) => {
 }
 
 
-//likes
+//likes NOT SURE😰
 
 export const likedPost = async (req, res, next) => {
   const userId = req.body.userId
