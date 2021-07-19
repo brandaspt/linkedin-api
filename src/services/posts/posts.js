@@ -11,5 +11,7 @@ router.post("/", Controllers.addNewPost)
 router.put("/:postId", validateObjectId, Controllers.editPost)
 router.delete("/:postId", validateObjectId, Controllers.deletePost)
 router.post("/:postId/uploadImage", validateObjectId, postsImgParser.single("postImg"), Controllers.uploadPostImage)
+router.post("/:postId/like", validateObjectId, Controllers.likedPost)
+
 
 export default router
