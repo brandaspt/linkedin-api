@@ -1,23 +1,62 @@
 import mongoose from "mongoose"
+import isEmail from "validator/lib/isEmail.js"
 
 const { Schema, model } = mongoose
 
 const reqString = { type: String, required: true }
 
-const UserSchema = new Schema(
+const experienceSchema = new Schema(
   {
-    name: reqString,
-    reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
-    description: reqString,
-    brand: reqString,
-    imageURL: {
-      ...reqString,
-      default: "https://m3placement.com/wp-content/uploads/2021/03/image-placeholder-350x350-1.png",
+    role: reqString,
+    company: reqString,
+    startDate: {
+      type: Date,
+      required: true,
     },
-    price: { type: Number, required: true },
-    category: reqString,
+    endDate: Date,
+    description: reqString,
+    area: reqString,
+    image: { ...reqString, default: "https://www.cornerstone-business.com/wp-content/uploads/2019/09/placeholder.png" },
   },
   { timestamps: true }
 )
+
+const UserSchema = new Schema(
+  {
+    name: reqString,
+    surname: reqString,
+    email: {
+      ...reqString,
+      unique: true,
+      validate: {
+        validator: isEmail,
+        message: "{VALUE} is not a valid email",
+        isAsync: false,
+      },
+    },
+    bio: reqString,
+    title: reqString,
+    area: reqString,
+    image: {
+      ...reqString,
+      default: function () {
+        return `https://eu.ui-avatars.com/api/?name=${this.name}+${this.surname}`
+      },
+    },
+    username: { ...reqString, unique: true },
+    experiences: [experienceSchema],
+  },
+  { timestamps: true }
+)
+
+UserSchema.pre("findOneAndUpdate", async function (next) {
+  const docToUpdate = await this.model.findOne(this.getQuery())
+  if (docToUpdate.image.includes("eu.ui-avatars.com")) {
+    this.set({
+      image: `https://eu.ui-avatars.com/api/?name=${this._update.name || docToUpdate.name}+${this._update.surname || docToUpdate.surname}`,
+    })
+  }
+  next()
+})
 
 export default model("User", UserSchema)
