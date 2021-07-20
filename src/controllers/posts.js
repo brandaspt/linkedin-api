@@ -1,7 +1,9 @@
 import createError from "http-errors"
 import q2m from "query-to-mongo"
+import mongoose from "mongoose"
 
 import PostModel from "../models/post.js"
+import UserModel from "../models/user.js"
 
 export const getAllPosts = async (req, res, next) => {
   try {
@@ -10,44 +12,48 @@ export const getAllPosts = async (req, res, next) => {
     const posts = await PostModel.find()
     res.send({ links: query.links("/posts", totalPosts), totalPosts, posts })
   } catch (error) {
-    next(createError(500, "An error occurred while getting posts "));
+    next(createError(500, "An error occurred while getting posts "))
   }
 }
 export const getSinglePost = async (req, res, next) => {
   try {
     const postId = req.params.postId
-    
+
     const post = await PostModel.findById(postId)
-    if(post){
+    if (post) {
       res.send(post)
-    }else{
-      next(createError(404, `Post not found!`));
+    } else {
+      next(createError(404, `Post not found!`))
     }
   } catch (error) {
-    next(createError(500, "An error occurred while getting post "));
+    next(createError(500, "An error occurred while getting post "))
   }
 }
 export const addNewPost = async (req, res, next) => {
+  const userId = req.body.userId
   try {
-    const newPost = new PostModel(req.body);
-    const { _id } = await newPost.save();
+    const user = await UserModel.findById(userId)
+    if (!user) return next(createError(404, `User with id ${userId} not found`))
 
-    res.status(201).send({ _id })
+    const newPostData = { text: req.body.text, username: user.username, userId: userId }
+
+    const newPost = new PostModel(newPostData)
+    const createdPost = await newPost.save()
+
+    res.status(201).send(createdPost)
   } catch (error) {
     if (error.name === "ValidationError") {
       next(createError(400, error))
     } else {
-      console.log(error)
-      next(createError(500, "An error occurred while creating new post"))
+      next(createError(500, error))
     }
-    next(createError(500, error))
   }
 }
 export const editPost = async (req, res, next) => {
   try {
     const postId = req.params.postId
 
-    const updatedPost = await PostModel.findByIdAndUpdate(postId,req.body,{
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, {
       new: true,
       runValidators: true,
     })
@@ -82,7 +88,7 @@ export const uploadPostImage = async (req, res, next) => {
     } else {
       image = req.file.path
     }
-    const updatedPost = await PostModel.findByIdAndUpdate(req.params.postId, {image: image }, { new: true })
+    const updatedPost = await PostModel.findByIdAndUpdate(req.params.postId, { image: image }, { new: true })
     if (!updatedPost) return next(createError(404, `Post with id ${req.params.postId} not found`))
     res.json(updatedPost)
   } catch (error) {
@@ -90,18 +96,20 @@ export const uploadPostImage = async (req, res, next) => {
   }
 }
 
-
-//likes NOT SURE😰
+// LIKES
 
 export const likedPost = async (req, res, next) => {
   const userId = req.body.userId
   if (!mongoose.isValidObjectId(userId)) return next(createError(400, "Invalid user ID"))
 
   try {
-
     // Check if post exists in db
     const postExists = await PostModel.exists({ _id: req.params.postId })
     if (!postExists) return next(createError(404, `Post with id ${req.params.postId} not found`))
+
+    // Check if user exists in db
+    const userExists = await UserModel.exists({ _id: userId })
+    if (!userExists) return next(createError(404, `User with id ${userId} not found`))
 
     // Check if user already likes the post
     const isUserInLikesArr = await PostModel.findOne({ _id: req.params.postId, likes: userId })
