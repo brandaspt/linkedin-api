@@ -1,5 +1,5 @@
 import createError from "http-errors"
-// import q2m from "query-to-mongo"
+import q2m from "query-to-mongo"
 
 import PostModel from "../models/post.js"
 
@@ -76,7 +76,13 @@ export const deletePost = async (req, res, next) => {
 }
 export const uploadPostImage = async (req, res, next) => {
   try {
-    const updatedPost = await PostModel.findByIdAndUpdate(req.params.postId, {image: req.file.path }, { new: true })
+    let image
+    if (req.body.url) {
+      image = req.body.url
+    } else {
+      image = req.file.path
+    }
+    const updatedPost = await PostModel.findByIdAndUpdate(req.params.postId, {image: image }, { new: true })
     if (!updatedPost) return next(createError(404, `Post with id ${req.params.postId} not found`))
     res.json(updatedPost)
   } catch (error) {

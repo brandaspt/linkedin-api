@@ -6,7 +6,10 @@ export const validateObjectId = async (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.userId)) return next(createError(400, "Invalid user ID"))
   }
   if (req.params.postId) {
-    if (!mongoose.isValidObjectId(req.params.postId)) return next(createError(400, "Invalid review ID"))
+    if (!mongoose.isValidObjectId(req.params.postId)) return next(createError(400, "Invalid post ID"))
+  }
+  if (req.params.expId) {
+    if (!mongoose.isValidObjectId(req.params.expId)) return next(createError(400, "Invalid experience ID"))
   }
   next()
 }

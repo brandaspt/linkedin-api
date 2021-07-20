@@ -23,7 +23,7 @@ const PostSchema = new Schema(
     },
     likes:[
       {
-        userId:String,
+        type: Schema.Types.ObjectId, ref: "User",
         
       },
     ],  
