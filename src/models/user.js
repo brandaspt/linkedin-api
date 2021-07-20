@@ -5,21 +5,20 @@ const { Schema, model } = mongoose
 
 const reqString = { type: String, required: true }
 
-const experienceSchema = new Schema(
-  {
-    role: reqString,
-    company: reqString,
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: Date,
-    description: reqString,
-    area: reqString,
-    image: { ...reqString, default: "https://www.cornerstone-business.com/wp-content/uploads/2019/09/placeholder.png" },
+const experienceSchema = new Schema({
+  role: reqString,
+  company: reqString,
+  startDate: {
+    type: Date,
+    required: true,
   },
-  { timestamps: true }
-)
+  endDate: Date,
+  description: reqString,
+  area: reqString,
+  image: { ...reqString, default: "https://www.cornerstone-business.com/wp-content/uploads/2019/09/placeholder.png" },
+  createdAt: Date,
+  updatedAt: Date,
+})
 
 const UserSchema = new Schema(
   {
@@ -51,7 +50,7 @@ const UserSchema = new Schema(
 
 UserSchema.pre("findOneAndUpdate", async function (next) {
   const docToUpdate = await this.model.findOne(this.getQuery())
-  if (docToUpdate.image.includes("eu.ui-avatars.com")) {
+  if (docToUpdate?.image.includes("eu.ui-avatars.com")) {
     this.set({
       image: `https://eu.ui-avatars.com/api/?name=${this._update.name || docToUpdate.name}+${this._update.surname || docToUpdate.surname}`,
     })

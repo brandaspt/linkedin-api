@@ -12,13 +12,13 @@ const usersImgStorage = new CloudinaryStorage({
 export const usersImgParser = multer({ storage: usersImgStorage })
 
 // EXPERIENCES
-const experiencesImgStorage = new CloudinaryStorage({
+const expImgStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "LinkedIn/Img/Experiences",
   },
 })
-export const experiencesImgParser = multer({ storage: experiencesImgStorage })
+export const expImgParser = multer({ storage: expImgStorage })
 
 // POSTS
 const postsImgStorage = new CloudinaryStorage({
