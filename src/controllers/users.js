@@ -1,4 +1,5 @@
-import { error } from "console"
+import { Readable } from "stream"
+import { Transform } from "json2csv"
 import createError from "http-errors"
 import { pipeline } from "stream"
 // import q2m from "query-to-mongo"
@@ -162,6 +163,25 @@ export const deleteExperience = async (req, res, next) => {
     )
     if (!updatedUser) return next(createError(404, `Not found.`))
     res.json({ ok: true, message: "Experience deleted successfully" })
+  } catch (error) {
+    next(createError(500, error))
+  }
+}
+
+// DOWNLOAD EXP CSV
+export const downloadExpCsv = async (req, res, next) => {
+  try {
+    const exps = await UserModel.findById(req.params.userId, { _id: 0, experiences: 1 })
+    const source = Readable.from(JSON.stringify(exps.experiences))
+    const options = { fields: ["role", "company", "startDate", "endDate", "description", "area"] }
+    const transform = new Transform(options)
+
+    res.setHeader("Content-Disposition", "attachment; filename=experiences.csv")
+    const destination = res
+
+    pipeline(source, transform, destination, err => {
+      if (err) console.log(err)
+    })
   } catch (error) {
     next(createError(500, error))
   }

@@ -17,6 +17,8 @@ router
 router.post("/:userId/uploadImage", validateObjectId, usersImgParser.single("userImg"), Controllers.uploadUserImage)
 // DOWNLOAD CV PDF
 router.get("/:userId/cv", validateObjectId, Controllers.downloadCvPdf)
+// DOWNLOAD EXP CSV
+router.get("/:userId/csv", validateObjectId, Controllers.downloadExpCsv)
 
 // EXPERIENCES
 router.route("/:userId/experiences").get(Controllers.getAllUserExperiences).post(validateObjectId, Controllers.addNewExperience)
