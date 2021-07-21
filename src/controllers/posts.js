@@ -1,10 +1,11 @@
 import createError from "http-errors"
 import q2m from "query-to-mongo"
-import mongoose from "mongoose"
 
 import PostModel from "../models/post.js"
 import UserModel from "../models/user.js"
+import CommentModel from "../models/comment.js"
 
+// POSTS
 export const getAllPosts = async (req, res, next) => {
   try {
     const query = q2m(req.query)
@@ -100,17 +101,8 @@ export const uploadPostImage = async (req, res, next) => {
 
 export const likedPost = async (req, res, next) => {
   const userId = req.body.userId
-  if (!mongoose.isValidObjectId(userId)) return next(createError(400, "Invalid user ID"))
 
   try {
-    // Check if post exists in db
-    const postExists = await PostModel.exists({ _id: req.params.postId })
-    if (!postExists) return next(createError(404, `Post with id ${req.params.postId} not found`))
-
-    // Check if user exists in db
-    const userExists = await UserModel.exists({ _id: userId })
-    if (!userExists) return next(createError(404, `User with id ${userId} not found`))
-
     // Check if user already likes the post
     const isUserInLikesArr = await PostModel.findOne({ _id: req.params.postId, likes: userId })
     let updatedPost
@@ -121,5 +113,43 @@ export const likedPost = async (req, res, next) => {
     res.json(updatedPost)
   } catch (error) {
     next(error)
+  }
+}
+
+// COMMENTS
+export const getPostComments = async (req, res, next) => {
+  try {
+    const comments = await CommentModel.find({ postId: req.params.postId })
+    res.json(comments)
+  } catch (error) {
+    next(createError(500, error))
+  }
+}
+export const addNewComment = async (req, res, next) => {
+  const postId = req.params.postId
+  const newComment = new CommentModel({ ...req.body, postId })
+  try {
+    const createdComment = await newComment.save()
+    res.status(201).json(createdComment)
+  } catch (error) {
+    next(createError(400, error))
+  }
+}
+export const deleteComment = async (req, res, next) => {
+  try {
+    const resp = await CommentModel.findByIdAndDelete(req.params.commId)
+    if (!resp) return next(createError(404, `Comment with id ${req.params.commId} not found`))
+    res.json({ ok: true, message: "User deleted successfully" })
+  } catch (error) {
+    next(createError(500, error))
+  }
+}
+export const editComment = async (req, res, next) => {
+  try {
+    const updatedComment = await CommentModel.findByIdAndUpdate(req.params.commId, { comment: req.body.comment })
+    if (!updatedComment) return next(createError(404, `Comment with id ${req.params.commId} not found`))
+    res.json(updatedComment)
+  } catch (error) {
+    next(createError(500, error))
   }
 }
