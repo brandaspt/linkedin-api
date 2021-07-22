@@ -4,6 +4,7 @@ import cors from "cors"
 
 import usersRouter from "./services/users/users.js"
 import postsRouter from "./services/posts/posts.js"
+import loginRouter from "./services/login/login.js"
 import { errorHandler } from "./errorHandlers.js"
 
 const server = express()
@@ -18,6 +19,7 @@ server.use(express.json())
 
 server.use("/users", usersRouter)
 server.use("/posts", postsRouter)
+server.use("/login", loginRouter)
 
 // ### ERROR HANDLERS ###
 server.use(errorHandler)
