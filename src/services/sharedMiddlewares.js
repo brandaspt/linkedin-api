@@ -1,5 +1,7 @@
 import mongoose from "mongoose"
 import createError from "http-errors"
+import jwt from "jsonwebtoken"
+
 import UserModel from "../models/user.js"
 import PostModel from "../models/post.js"
 
@@ -36,5 +38,22 @@ export const postExists = field => {
     const post = await PostModel.findById(postId)
     if (!post) next(createError(404, `Post with id ${postId} not found`))
     else next()
+  }
+}
+
+export const authenticateJWT = async (req, res, next) => {
+  const authHeader = req.headers.authorization
+  if (!authHeader) return next(createError(401, "Authorization header missing"))
+  const token = authHeader.split(" ")[1]
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+
+    const user = await UserModel.findById(decoded._id)
+    req.user = user
+
+    next()
+  } catch (error) {
+    next(createError(403, error))
   }
 }

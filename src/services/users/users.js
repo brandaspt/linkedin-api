@@ -1,5 +1,5 @@
 import express from "express"
-import { validateObjectId } from "../sharedMiddlewares.js"
+import { authenticateJWT, validateObjectId } from "../sharedMiddlewares.js"
 import * as Controllers from "../../controllers/users.js"
 import { usersImgParser, expImgParser } from "../../settings/cloudinary.js"
 
@@ -7,14 +7,15 @@ const router = express.Router()
 
 // USERS
 router.route("/").get(Controllers.getAllUsers).post(Controllers.addNewUser)
+router.get("/me", authenticateJWT, Controllers.sendUser)
 router
   .route("/:userId")
   .get(validateObjectId, Controllers.getSingleUser)
-  .put(validateObjectId, Controllers.editUser)
+  .put(validateObjectId, authenticateJWT, Controllers.editUser)
   .delete(validateObjectId, Controllers.deleteUser)
 
 // USER IMAGE UPLOAD
-router.post("/:userId/uploadImage", validateObjectId, usersImgParser.single("userImg"), Controllers.uploadUserImage)
+router.post("/:userId/uploadImage", validateObjectId, authenticateJWT, usersImgParser.single("userImg"), Controllers.uploadUserImage)
 // DOWNLOAD CV PDF
 router.get("/:userId/cv", validateObjectId, Controllers.downloadCvPdf)
 // DOWNLOAD EXP CSV
