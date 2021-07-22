@@ -2,7 +2,7 @@ import { Readable } from "stream"
 import { Transform } from "json2csv"
 import createError from "http-errors"
 import { pipeline } from "stream"
-import bcrypt from "bcrypt"
+// import bcrypt from "bcrypt"
 // import q2m from "query-to-mongo"
 
 import UserModel from "../models/user.js"
@@ -32,8 +32,8 @@ export const getSingleUser = async (req, res, next) => {
   }
 }
 export const addNewUser = async (req, res, next) => {
-  const hashedPass = await bcrypt.hash(req.body.password, 10)
-  req.body.password = hashedPass
+  // const hashedPass = await bcrypt.hash(req.body.password, 10)
+  // req.body.password = hashedPass
   const newUser = new UserModel(req.body)
   try {
     await newUser.save()
@@ -44,10 +44,10 @@ export const addNewUser = async (req, res, next) => {
 }
 export const editUser = async (req, res, next) => {
   const update = { ...req.body }
-  if (req.body.password) {
-    const hashedPass = await bcrypt.hash(req.body.password, 10)
-    update.password = hashedPass
-  }
+  // if (req.body.password) {
+  //   const hashedPass = await bcrypt.hash(req.body.password, 10)
+  //   update.password = hashedPass
+  // }
 
   try {
     const updatedUser = await UserModel.findByIdAndUpdate(req.params.userId, update, { new: true, runValidators: true })
