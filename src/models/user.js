@@ -33,6 +33,7 @@ const UserSchema = new Schema(
         isAsync: false,
       },
     },
+    password: reqString,
     bio: reqString,
     title: reqString,
     area: reqString,

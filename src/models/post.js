@@ -6,14 +6,8 @@ const reqString = { type: String, required: true }
 
 const PostSchema = new Schema(
   {
-    text: {
-      type: String,
-      required: true,
-    },
-    username: {
-      type: String,
-      required: true,
-    },
+    text: reqString,
+    username: reqString,
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -21,7 +15,6 @@ const PostSchema = new Schema(
     },
     image: {
       type: String,
-      default: "https://www.cornerstone-business.com/wp-content/uploads/2019/09/placeholder.png",
     },
     likes: [
       {

@@ -2,6 +2,7 @@ import { Readable } from "stream"
 import { Transform } from "json2csv"
 import createError from "http-errors"
 import { pipeline } from "stream"
+import bcrypt from "bcrypt"
 // import q2m from "query-to-mongo"
 
 import UserModel from "../models/user.js"
@@ -16,6 +17,11 @@ export const getAllUsers = async (req, res, next) => {
   }
 }
 
+export const sendUser = (req, res, next) => {
+  console.log(req.user)
+  res.json(req.user)
+}
+
 export const getSingleUser = async (req, res, next) => {
   try {
     const user = await UserModel.findById(req.params.userId)
@@ -26,16 +32,23 @@ export const getSingleUser = async (req, res, next) => {
   }
 }
 export const addNewUser = async (req, res, next) => {
+  const hashedPass = await bcrypt.hash(req.body.password, 10)
+  req.body.password = hashedPass
   const newUser = new UserModel(req.body)
   try {
     await newUser.save()
     res.status(201).json(newUser)
   } catch (error) {
-    res.json(error)
+    next(createError(400, error))
   }
 }
 export const editUser = async (req, res, next) => {
   const update = { ...req.body }
+  if (req.body.password) {
+    const hashedPass = await bcrypt.hash(req.body.password, 10)
+    update.password = hashedPass
+  }
+
   try {
     const updatedUser = await UserModel.findByIdAndUpdate(req.params.userId, update, { new: true, runValidators: true })
     if (!updatedUser) return next(createError(404, `User with id ${req.params.userId} not found.`))
