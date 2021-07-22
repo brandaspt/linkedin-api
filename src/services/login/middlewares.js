@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt"
+// import bcrypt from "bcrypt"
 import UserModel from "../../models/user.js"
 import createError from "http-errors"
 
@@ -7,8 +7,9 @@ export const checkUser = async (req, res, next) => {
   try {
     const user = await UserModel.findOne({ email: email })
     if (!user) return next(createError(404, `User with email ${email} not found`))
-    const match = await bcrypt.compare(password, user.password)
-    if (!match) return next(createError(401, "Wrong password"))
+    // const match = await bcrypt.compare(password, user.password)
+
+    if (password !== user.password) return next(createError(401, "Wrong password"))
     req.user = user
     next()
   } catch (error) {
