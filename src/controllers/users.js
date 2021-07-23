@@ -10,7 +10,7 @@ import { cvPDFStream } from "../utils/pdf.js"
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await UserModel.find()
+    const users = await UserModel.find({}, { experiences: 0, password: 0 })
     res.json(users)
   } catch (error) {
     next(createError(500, error))
@@ -18,13 +18,12 @@ export const getAllUsers = async (req, res, next) => {
 }
 
 export const sendUser = (req, res, next) => {
-  console.log(req.user)
-  res.json(req.user)
+  res.json({ _id: req.user._id, image: req.user.image })
 }
 
 export const getSingleUser = async (req, res, next) => {
   try {
-    const user = await UserModel.findById(req.params.userId)
+    const user = await UserModel.findById(req.params.userId, { password: 0 })
     if (!user) return next(createError(404, `User with id ${req.params.userId} not found.`))
     res.json(user)
   } catch (error) {
@@ -37,7 +36,7 @@ export const addNewUser = async (req, res, next) => {
   const newUser = new UserModel(req.body)
   try {
     await newUser.save()
-    res.status(201).json(newUser)
+    res.status(201).json(newUser._id)
   } catch (error) {
     next(createError(400, error))
   }
@@ -52,7 +51,7 @@ export const editUser = async (req, res, next) => {
   try {
     const updatedUser = await UserModel.findByIdAndUpdate(req.params.userId, update, { new: true, runValidators: true })
     if (!updatedUser) return next(createError(404, `User with id ${req.params.userId} not found.`))
-    res.json(updatedUser)
+    res.json({ ok: true, message: `User updated successfully` })
   } catch (error) {
     next(createError(400, error))
   }
@@ -73,7 +72,7 @@ export const uploadUserImage = async (req, res, next) => {
   try {
     const updatedUser = await UserModel.findByIdAndUpdate(req.params.userId, update, { new: true, runValidators: true })
     if (!updatedUser) return next(createError(404, `User with id ${req.params.userId} not found.`))
-    res.json(updatedUser)
+    res.json({ ok: true, message: `User updated successfully` })
   } catch (error) {
     next(createError(500, error))
   }
@@ -115,7 +114,8 @@ export const addNewExperience = async (req, res, next) => {
       { new: true, runValidators: true }
     )
     if (!updatedUser) return next(createError(404, `User with id ${req.params.userId} not found.`))
-    res.json(updatedUser)
+    res.json(updatedUser.experiences.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0])
+    // res.json({ ok: true, message: "Experience added successfully" })
   } catch (error) {
     next(createError(400, error))
   }
@@ -157,7 +157,8 @@ export const editExperience = async (req, res, next) => {
       },
       { new: true, runValidators: true }
     )
-    res.json(updatedUser)
+    const updatedExp = updatedUser.toObject().experiences.find(experience => experience._id.toString() === req.params.expId)
+    res.json(updatedExp)
   } catch (error) {
     next(createError(500, error))
   }

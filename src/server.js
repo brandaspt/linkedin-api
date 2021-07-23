@@ -6,13 +6,14 @@ import usersRouter from "./services/users/users.js"
 import postsRouter from "./services/posts/posts.js"
 import loginRouter from "./services/login/login.js"
 import { errorHandler } from "./errorHandlers.js"
+import { corsOptions } from "./settings/cors.js"
 
 const server = express()
 const PORT = process.env.PORT || 3001
 const DB_STRING = process.env.DB_STRING
 
 // ### MIDDLEWARES ###
-server.use(cors())
+server.use(cors(corsOptions))
 server.use(express.json())
 
 // ### ENDPOINTS ###
